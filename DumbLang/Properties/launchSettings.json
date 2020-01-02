@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DumbLang": {
+      "commandName": "Project",
+      "commandLineArgs": "Program.script"
+    }
+  }
+}

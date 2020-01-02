@@ -1,0 +1,12 @@
+[
+    { "First" "Second" }
+    "Name1" : { "Third" "Fourth" }
+    [
+        {} []
+    ]
+    "Name2" : [
+        "Name3"
+        : { "Fifth" }
+        [ { "Sixth" } ]
+    ]
+]

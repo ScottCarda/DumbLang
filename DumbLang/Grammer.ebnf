@@ -1,0 +1,10 @@
+﻿Element (* This is the start node *)
+
+Element =  Node | Label, _spaces_, ":", Node
+
+Node = _spaces_, "{", SingleNode, _spaces_ , "}" | _spaces_, "[", GroupNode, _spaces_, "]"
+
+SingleNode = "" | SingleNode, Label
+GroupNode = "" | GroupNode, Element
+
+Label = _spaces_, _string_
