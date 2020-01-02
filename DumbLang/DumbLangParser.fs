@@ -9,6 +9,6 @@ type DumbLangParser() =
         count <- count + 1
         base.onNamed (name, label)
 
-    override this.onLabel str =
+    override this.onLabel str row col =
         let newStr = (String.replicate count "s") + str
-        base.onLabel newStr
+        base.onLabel newStr row col

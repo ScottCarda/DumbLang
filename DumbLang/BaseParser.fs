@@ -7,11 +7,13 @@ exception Error of string
 
 type BaseParser() =
 
-    abstract member onLabel : string -> Label
-    default this.onLabel str = Label(str)
-
-    abstract member onSingleNode : Label list -> Node
-    default this.onSingleNode labels = SingleNode labels
+    (* Label *)
+    
+    abstract member onLabel : string -> int -> int -> Label
+    default this.onLabel str row col = { Value = str; Position = row, col }
+    
+    abstract member onSingleNode : Label list -> int -> int -> Node
+    default this.onSingleNode labels row col = SingleNode { Labels = labels; Position = row, col }
 
     abstract member onGroupNode : Element list -> Node
     default this.onGroupNode elems = GroupNode elems
@@ -46,19 +48,26 @@ type BaseParser() =
         let element, elementImpl = createParserForwardedToRef()
         let node, nodeImpl = createParserForwardedToRef()
         
-        let label = spaces >>? quote >>. manyCharsTill anyChar quote |>> this.onLabel
+        let label =
+            spaces >>?
+            getPosition .>>?
+            quote .>>.? manyCharsTill anyChar quote |>> fun (pos, text) -> 
+            this.onLabel text (int pos.Line) (int pos.Column)
 
         //let single = many label |> betweenBraces |>> SingleNode
         //let group = many element |> betweenBrackets |>> GroupNode
         
-        let single = openBrace  >>=? fun _ ->
-                     many label >>=? fun labels ->
-                     closeBrace >>=? fun _ ->
-                     preturn labels |>> this.onSingleNode
+        let single = spaces >>?
+                     getPosition .>>?
+                     skipStringCI "{" .>>.?
+                     many label .>>?
+                     spaces .>>?
+                     skipStringCI "}" |>> fun (pos, labels) ->
+                     this.onSingleNode labels (int pos.Line) (int pos.Column)
 
-        let group = openBracket  >>=? fun _ ->
+        let group = openBracket  >>=? fun () ->
                     many element >>=? fun elems ->
-                    closeBracket >>=? fun _ ->
+                    closeBracket >>=? fun () ->
                     preturn elems |>> this.onGroupNode
 
         do nodeImpl := choice[single; group]
